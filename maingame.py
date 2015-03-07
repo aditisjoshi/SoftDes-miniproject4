@@ -25,21 +25,17 @@ class DrawableSurface():
         return self.rect
 
 class FlappyModel():
-    """ Represents the game state of our Flappy bird clone """
+    """ Represents the game state of our Nyan Cat clone """
     def __init__(self, width, height):
         """ Initialize the flappy model """
         self.width = width
         self.height = height
-        self.bird = Bird(0,100)
+        self.cat = Cat(0,100)
 
-    def update(self, delta_t):
-        """ Updates the model and its constituent parts """
-        self.bird.update(delta_t)
-
-class Bird():
-    """ Represents the player in the game (the Flappy Bird) """
+class Cat():
+    """ Represents the player in the game (the Nyan Cat) """
     def __init__(self,pos_x,pos_y):
-        """ Initialize a Flappy bird at the specified position
+        """ Initialize a Nyan Cat at the specified position
             pos_x, pos_y """
         self.pos_x = pos_x
         self.pos_y = pos_y
@@ -50,21 +46,13 @@ class Bird():
         self.image.set_colorkey((255,255,255))
 
     def draw(self, screen):
-        """ get the drawables that makeup the Flappy Bird Player """
+        """ get the drawables that makeup the Nyan Cat Player """
         screen.blit(self.image, self.image.get_rect().move(self.pos_x, self.pos_y))
 
-    def update(self, delta_t):
-        """ update bird due to passage of time """
-        self.pos_x += self.vel_x*delta_t
-        self.pos_y += self.vel_y*delta_t
-        self.vel_y += 20*delta_t
-
-    def flap(self):
-        self.vel_y -= 5
 
 class FlappyView():
     def __init__(self, model, width, height):
-        """ Initialize the view for Flappy Bird.  The input model
+        """ Initialize the view for Nyan Cat.  The input model
             is necessary to find the position of relevant objects
             to draw. """
         pygame.init()
@@ -76,14 +64,14 @@ class FlappyView():
     def draw(self):
         """ Redraw the full game window """
         self.screen.fill((0,51,102))
-        self.model.bird.draw(self.screen)
+        self.model.cat.draw(self.screen)
         pygame.display.update()
 
-class FlappyBird():
-    """ The main Flappy Bird class """
+class NyanCat():
+    """ The main Nyan Cat class """
 
     def __init__(self):
-        """ Initialize the flappy bird game.  Use FlappyBird.run to
+        """ Initialize the Nyan Cat game.  Use NyanCat.run to
             start the game """
         self.model = FlappyModel(640, 480)
         self.view = FlappyView(self.model, 640, 480)
@@ -96,8 +84,6 @@ class FlappyBird():
         while True:
             self.view.draw()
             self.controller.process_events()
-            delta_t = time.time() - last_update
-            self.model.update(delta_t)
             last_update = time.time()
 
 class PygameKeyboardController():
@@ -111,8 +97,8 @@ class PygameKeyboardController():
             self.space_pressed = False
         elif not(self.space_pressed):
             self.space_pressed = True
-            self.model.bird.flap()
+            self.model.cat.flap()
 
 if __name__ == '__main__':
-    flappy = FlappyBird()
-    flappy.run()
+    cat = NyanCat()
+    cat.run()
