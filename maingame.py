@@ -100,17 +100,13 @@ class NyanCat():
 class PygameKeyboardController():
     def __init__(self, model):
         self.model = model
-        self.space_pressed = False
 
     def process_events(self):
         pygame.event.pump()
-        if not(pygame.key.get_pressed()[pygame.K_SPACE]):
-            self.space_pressed = False
-        elif not(self.space_pressed):
-            self.space_pressed = True
-
-    def space_pressed(self):
-        pass
+        if (pygame.mouse.get_pressed()[0]):
+            self.model.cat.vel_x = 0
+        else:
+            self.model.cat.vel_x = 50
 
 if __name__ == '__main__':
     cat = NyanCat()
