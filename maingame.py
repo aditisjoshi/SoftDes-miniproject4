@@ -73,6 +73,11 @@ class NyanView():
         self.screen.fill((0,51,102))
         pygame.draw.rect(self.screen, (255,20,147), (0,0,640,20),0)
         pygame.draw.rect(self.screen, (255,20,147), (0,460,640,20),0)
+        x_pos = random.randint(int(self.model.cat.pos_x),640)
+        y_pos = random.randint(0,480)
+        color = random.randint(0,3)
+        color_converter = [(144,245,0),(7,185,152),(192,16,191),(255,230,59)]
+        pygame.draw.circle(self.screen, color_converter[color], (x_pos,y_pos), 15, 0)
         self.model.cat.draw(self.screen)
         pygame.display.update()
 
