@@ -74,6 +74,16 @@ class NyanView():
         self.model.cat.draw(self.screen)
         pygame.display.update()
 
+class Wall():
+    def __init__(self, model, width, height): 
+        self.screen = pygame.display.set_mode((width, height))
+        self.model = model
+
+    def draw(self): 
+        pygame.draw.rect(self.screen, (255,20,147), (0,0,640,20),0)
+        pygame.draw.rect(self.screen, (255,20,147), (0,460,640,20),0)
+        pygame.display.update()
+
 class NyanCat():
     """ The main Nyan Cat class """
 
@@ -83,12 +93,14 @@ class NyanCat():
         self.model = CatPlayer(640, 480)
         self.view = NyanView(self.model, 640, 480)
         self.controller = PygameKeyboardController(self.model)
+        self.wall = Wall(self.model, 640, 480)
         # we will code the controller later
 
     def run(self):
         """ the main runloop... loop until death """
         last_update = time.time()
         while True:
+            self.wall.draw()
             self.view.draw()
             delta_t = time.time() - last_update
             self.model.update(delta_t)
