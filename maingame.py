@@ -24,13 +24,17 @@ class DrawableSurface():
         """ Get the rect """
         return self.rect
 
-class FlappyModel():
+class CatPlayer():
     """ Represents the game state of our Nyan Cat clone """
     def __init__(self, width, height):
-        """ Initialize the flappy model """
+        """ Initialize the player """
         self.width = width
         self.height = height
         self.cat = Cat(0,100)
+
+    def update(self, delta_t):
+        """ Updates the model and its constituent parts """
+        self.cat.update(delta_t)
 
 class Cat():
     """ Represents the player in the game (the Nyan Cat) """
@@ -49,8 +53,11 @@ class Cat():
         """ get the drawables that makeup the Nyan Cat Player """
         screen.blit(self.image, self.image.get_rect().move(self.pos_x, self.pos_y))
 
+    def update(self, delta_t):
+        self.pos_x += self.vel_x*delta_t
+        self.pos_y += self.vel_y*delta_t
 
-class FlappyView():
+class NyanView():
     def __init__(self, model, width, height):
         """ Initialize the view for Nyan Cat.  The input model
             is necessary to find the position of relevant objects
@@ -73,8 +80,8 @@ class NyanCat():
     def __init__(self):
         """ Initialize the Nyan Cat game.  Use NyanCat.run to
             start the game """
-        self.model = FlappyModel(640, 480)
-        self.view = FlappyView(self.model, 640, 480)
+        self.model = CatPlayer(640, 480)
+        self.view = NyanView(self.model, 640, 480)
         self.controller = PygameKeyboardController(self.model)
         # we will code the controller later
 
@@ -83,6 +90,8 @@ class NyanCat():
         last_update = time.time()
         while True:
             self.view.draw()
+            delta_t = time.time() - last_update
+            self.model.update(delta_t)
             self.controller.process_events()
             last_update = time.time()
 
@@ -97,7 +106,9 @@ class PygameKeyboardController():
             self.space_pressed = False
         elif not(self.space_pressed):
             self.space_pressed = True
-            self.model.cat.flap()
+
+    def space_pressed(self):
+        pass
 
 if __name__ == '__main__':
     cat = NyanCat()
