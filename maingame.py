@@ -8,6 +8,8 @@ import pygame
 import random
 import time
 
+
+
 class DrawableSurface():
     """ A class that wraps a pygame.Surface and a pygame.Rect """
 
@@ -67,25 +69,35 @@ class NyanView():
         self.screen = pygame.display.set_mode((width, height))
         # this is used for figuring out where to draw stuff
         self.model = model
+        self.width = width
+        self.height = height
 
     def draw(self):
         """ Redraw the full game window """
         self.screen.fill((0,51,102))
-        pygame.draw.rect(self.screen, (255,20,147), (0,0,640,20),0)
-        pygame.draw.rect(self.screen, (255,20,147), (0,460,640,20),0)
+        # Draw the walls of the game
+        wall_color = (255,20,147)
+        wall_thick = 20
+        wall_margin = 50
+        # Draw top wall
+        pygame.draw.rect(self.screen, wall_color, (0,wall_margin,self.width,wall_thick),0)
+        # Draw bottom wall
+        pygame.draw.rect(self.screen, wall_color, (0,self.height-wall_margin-wall_thick,self.width,wall_thick),0)
         self.model.cat.draw(self.screen)
         pygame.display.update()
 
+
+################################################################################
 class NyanCat():
     """ The main Nyan Cat class """
 
     def __init__(self):
         """ Initialize the Nyan Cat game.  Use NyanCat.run to
             start the game """
-        width = 
-        height = 
-        self.model = CatPlayer(640, 480)
-        self.view = NyanView(self.model, 640, 480)
+        width = 1000
+        height = 480
+        self.model = CatPlayer(width, height)
+        self.view = NyanView(self.model, width, height)
         self.controller = PygameKeyboardController(self.model)
         # we will code the controller later
 
@@ -99,6 +111,7 @@ class NyanCat():
             self.controller.process_events()
             last_update = time.time()
 
+################################################################################
 class PygameKeyboardController():
     def __init__(self, model):
         self.model = model
