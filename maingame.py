@@ -90,6 +90,8 @@ class NyanCat():
     def __init__(self):
         """ Initialize the Nyan Cat game.  Use NyanCat.run to
             start the game """
+        width = 
+        height = 
         self.model = CatPlayer(640, 480)
         self.view = NyanView(self.model, 640, 480)
         self.controller = PygameKeyboardController(self.model)
