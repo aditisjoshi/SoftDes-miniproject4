@@ -90,7 +90,7 @@ class Circles():
     def __init__(self, model, width, height):
         self.model = model
         self.screen = pygame.display.set_mode((width, height))
-        self.pos_x = random.randint(int(self.model.cat.pos_x),width)
+        self.pos_x = width
         self.pos_y = random.randint(0,height)
         self.vel_y = 0
         self.vel_x = 50
@@ -113,31 +113,32 @@ class NyanCat():
     def __init__(self):
         """ Initialize the Nyan Cat game.  Use NyanCat.run to
             start the game """
-        width = 1000
-        height = 480
-        self.model = CatPlayer(width, height)
-        self.view = NyanView(self.model, width, height)
+        self.width = 1000
+        self.height = 480
+        self.model = CatPlayer(self.width, self.height)
+        self.view = NyanView(self.model, self.width, self.height)
         self.model = CatPlayer(640, 480)
-        self.view = NyanView(self.model, width, height)
+        self.view = NyanView(self.model, self.width, self.height)
         self.circles = []
-        for i in range(0,10):
-             self.circles.append(Circles(self.model, width, height))
         self.controller = PygameKeyboardController(self.model,self.circles)
         # we will code the controller later
 
     def run(self):
         """ the main runloop... loop until death """
         last_update = time.time()
+        make_circle = True
 
         while True:
+            while make_circle:
+                self.circles.append(Circles(self.model, self.width, self.height))
+                make_circle = False
             self.view.draw()
-            for circle in self.circles:
-                circle.draw()
-            pygame.display.update()
             delta_t = time.time() - last_update
             self.model.update(delta_t)
             for circle in self.circles:
+                circle.draw()
                 circle.update(-delta_t)
+            pygame.display.update()
             self.controller.process_events()
             last_update = time.time()
 
