@@ -38,7 +38,7 @@ class CatPlayer():
         """ Updates the model and its constituent parts """
         self.cat.update(delta_t)
 
-class Cat():
+class Cat(pygame.sprite.Sprite):
     """ Represents the player in the game (the Nyan Cat) """
     def __init__(self,pos_x,pos_y):
         """ Initialize a Nyan Cat at the specified position
@@ -69,8 +69,12 @@ class NyanView():
         self.screen = pygame.display.set_mode((width, height))
         # this is used for figuring out where to draw stuff
         self.model = model
+<<<<<<< HEAD
         self.width = width
         self.height = height
+=======
+        self.vel_x = 50
+>>>>>>> {circles}
 
     def draw(self):
         """ Redraw the full game window """
@@ -84,7 +88,26 @@ class NyanView():
         # Draw bottom wall
         pygame.draw.rect(self.screen, wall_color, (0,self.height-wall_margin-wall_thick,self.width,wall_thick),0)
         self.model.cat.draw(self.screen)
-        pygame.display.update()
+        # pygame.display.update()
+
+class Circles():
+    def __init__(self, model, width, height):
+        self.model = model
+        self.screen = pygame.display.set_mode((width, height))
+        self.pos_x = random.randint(int(self.model.cat.pos_x),640)
+        self.pos_y = random.randint(0,480)
+        self.vel_y = 0
+        self.vel_x = 50
+
+    def draw(self): 
+        color = random.randint(0,3)
+        color_converter = [(144,245,0),(7,185,152),(192,16,191),(255,230,59)]
+        pygame.draw.circle(self.screen, color_converter[color], (int(self.pos_x),int(self.pos_y)), 15, 0)
+        # pygame.display.update()
+
+    def update(self, delta_t):
+        self.pos_x += self.vel_x*delta_t
+        self.pos_y += self.vel_y*delta_t
 
 
 ################################################################################
@@ -94,34 +117,52 @@ class NyanCat():
     def __init__(self):
         """ Initialize the Nyan Cat game.  Use NyanCat.run to
             start the game """
+<<<<<<< HEAD
         width = 1000
         height = 480
         self.model = CatPlayer(width, height)
         self.view = NyanView(self.model, width, height)
         self.controller = PygameKeyboardController(self.model)
+=======
+        self.model = CatPlayer(640, 480)
+        self.view = NyanView(self.model, 640, 480)
+        self.circles = Circles(self.model, 640, 480)
+        self.controller = PygameKeyboardController(self.model,self.circles)
+>>>>>>> {circles}
         # we will code the controller later
 
     def run(self):
         """ the main runloop... loop until death """
         last_update = time.time()
+
         while True:
             self.view.draw()
+            self.circles.draw()
+            pygame.display.update()
             delta_t = time.time() - last_update
             self.model.update(delta_t)
+            self.circles.update(-delta_t)
             self.controller.process_events()
             last_update = time.time()
 
+<<<<<<< HEAD
 ################################################################################
+=======
+
+>>>>>>> {circles}
 class PygameKeyboardController():
-    def __init__(self, model):
+    def __init__(self, model, circles):
         self.model = model
+        self.circles = circles
 
     def process_events(self):
         pygame.event.pump()
         if (pygame.mouse.get_pressed()[0]):
             self.model.cat.vel_x = 0
+            self.circles.vel_x = 0
         else:
             self.model.cat.vel_x = 50
+            self.circles.vel_x = 50
 
 if __name__ == '__main__':
     cat = NyanCat()
