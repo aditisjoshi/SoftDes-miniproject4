@@ -75,7 +75,7 @@ class NyanView():
         pygame.draw.rect(self.screen, (255,20,147), (0,0,640,20),0)
         pygame.draw.rect(self.screen, (255,20,147), (0,460,640,20),0)
         self.model.cat.draw(self.screen)
-        pygame.display.update()
+        # pygame.display.update()
 
 class Circles():
     def __init__(self, model, width, height):
@@ -86,11 +86,11 @@ class Circles():
         self.vel_y = 0
         self.vel_x = 50
 
-    def draw(self):
+    def draw(self): 
         color = random.randint(0,3)
         color_converter = [(144,245,0),(7,185,152),(192,16,191),(255,230,59)]
         pygame.draw.circle(self.screen, color_converter[color], (int(self.pos_x),int(self.pos_y)), 15, 0)
-        pygame.display.update()
+        # pygame.display.update()
 
     def update(self, delta_t):
         self.pos_x += self.vel_x*delta_t
@@ -111,14 +111,17 @@ class NyanCat():
     def run(self):
         """ the main runloop... loop until death """
         last_update = time.time()
+
         while True:
             self.view.draw()
             self.circles.draw()
+            pygame.display.update()
             delta_t = time.time() - last_update
             self.model.update(delta_t)
             self.circles.update(-delta_t)
             self.controller.process_events()
             last_update = time.time()
+
 
 class PygameKeyboardController():
     def __init__(self, model, circles):
