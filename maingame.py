@@ -69,12 +69,8 @@ class NyanView():
         self.screen = pygame.display.set_mode((width, height))
         # this is used for figuring out where to draw stuff
         self.model = model
-<<<<<<< HEAD
         self.width = width
         self.height = height
-=======
-        self.vel_x = 50
->>>>>>> {circles}
 
     def draw(self):
         """ Redraw the full game window """
@@ -117,18 +113,14 @@ class NyanCat():
     def __init__(self):
         """ Initialize the Nyan Cat game.  Use NyanCat.run to
             start the game """
-<<<<<<< HEAD
         width = 1000
         height = 480
         self.model = CatPlayer(width, height)
         self.view = NyanView(self.model, width, height)
-        self.controller = PygameKeyboardController(self.model)
-=======
         self.model = CatPlayer(640, 480)
-        self.view = NyanView(self.model, 640, 480)
-        self.circles = Circles(self.model, 640, 480)
+        self.view = NyanView(self.model, width, height)
+        self.circles = Circles(self.model, width, height)
         self.controller = PygameKeyboardController(self.model,self.circles)
->>>>>>> {circles}
         # we will code the controller later
 
     def run(self):
@@ -145,11 +137,8 @@ class NyanCat():
             self.controller.process_events()
             last_update = time.time()
 
-<<<<<<< HEAD
 ################################################################################
-=======
 
->>>>>>> {circles}
 class PygameKeyboardController():
     def __init__(self, model, circles):
         self.model = model
