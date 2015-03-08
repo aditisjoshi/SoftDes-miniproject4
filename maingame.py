@@ -90,8 +90,8 @@ class Circles():
     def __init__(self, model, width, height):
         self.model = model
         self.screen = pygame.display.set_mode((width, height))
-        self.pos_x = random.randint(int(self.model.cat.pos_x),640)
-        self.pos_y = random.randint(0,480)
+        self.pos_x = random.randint(int(self.model.cat.pos_x),width)
+        self.pos_y = random.randint(0,height)
         self.vel_y = 0
         self.vel_x = 50
 
@@ -119,7 +119,9 @@ class NyanCat():
         self.view = NyanView(self.model, width, height)
         self.model = CatPlayer(640, 480)
         self.view = NyanView(self.model, width, height)
-        self.circles = Circles(self.model, width, height)
+        self.circles = []
+        for i in range(0,10):
+             self.circles.append(Circles(self.model, width, height))
         self.controller = PygameKeyboardController(self.model,self.circles)
         # we will code the controller later
 
@@ -129,11 +131,13 @@ class NyanCat():
 
         while True:
             self.view.draw()
-            self.circles.draw()
+            for circle in self.circles:
+                circle.draw()
             pygame.display.update()
             delta_t = time.time() - last_update
             self.model.update(delta_t)
-            self.circles.update(-delta_t)
+            for circle in self.circles:
+                circle.update(-delta_t)
             self.controller.process_events()
             last_update = time.time()
 
@@ -148,10 +152,12 @@ class PygameKeyboardController():
         pygame.event.pump()
         if (pygame.mouse.get_pressed()[0]):
             self.model.cat.vel_x = 0
-            self.circles.vel_x = 0
+            for circle in self.circles:
+                circle.vel_x = 0
         else:
             self.model.cat.vel_x = 50
-            self.circles.vel_x = 50
+            for circle in self.circles:
+                circle.vel_x = 50
 
 if __name__ == '__main__':
     cat = NyanCat()
