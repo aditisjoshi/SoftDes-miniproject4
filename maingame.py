@@ -32,7 +32,7 @@ class CatPlayer():
         """ Initialize the player """
         self.width = width
         self.height = height
-        self.cat = Cat(self.width/3,self.height/2)
+        self.catplayer = Cat(self.width/3,self.height/2)
 
     def update(self, delta_t):
         """ Updates the model and its constituent parts """
@@ -114,10 +114,18 @@ class Model():
     def update(self, delta_t):
         self.cat.update(delta_t)
         for circle in self.circles:
-            circle.update(-delta_t)
+            circle.update(delta_t)
         make_circle = random.randint(0,2000)
         if make_circle == 2000:
             self.circles.append(Circle(self.width, self.height))
+
+    def switchMode(self):
+        for circle in self.circles:
+            circle.vel_x = 0
+
+    def returnMode(self):
+        for circle in self.circles:
+            circle.vel_x = 50
 
 
 ################################################################################
@@ -143,7 +151,6 @@ class NyanCat():
             delta_t = time.time() - last_update
             pygame.display.update()
             self.model.update(delta_t)
-            self.circles.update(delta_t)
             self.controller.process_events()
             last_update = time.time()
 
@@ -154,16 +161,11 @@ class PygameKeyboardController():
         self.model = model
 
     def process_events(self):
-        #change this to be self.model.switchmode which is a function that has all of the changes
         pygame.event.pump()
         if (pygame.mouse.get_pressed()[0]):
-            self.model.cat.vel_x = 0
-            for circle in self.model.circles:
-                circle.vel_x = 0
+            self.model.switchMode()
         else:
-            self.model.cat.vel_x = 50
-            for circle in self.model.circles:
-                circle.vel_x = 50
+            self.model.returnMode()
 
 
 if __name__ == '__main__':
