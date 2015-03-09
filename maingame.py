@@ -5,6 +5,7 @@ Making a side-scrolling game with nyan cat based on One More Line
 """
 
 import pygame
+from pygame.locals import *
 import random
 import time
 
@@ -43,13 +44,22 @@ class Cat(pygame.sprite.Sprite):
     def __init__(self,pos_x,pos_y):
         """ Initialize a Nyan Cat at the specified position
             pos_x, pos_y """
+        self.img_width = 142
+        self.img_height = 89
         self.pos_x = pos_x
         self.pos_y = pos_y
         self.vel_x = 0
         self.vel_y = 0
         # TODO: don't depend on relative path
         self.image = pygame.image.load('nyan_cat.png')
-        self.image.set_colorkey((255,255,255))
+        self.image.set_colorkey((255,255,255)) 
+        self.poptart = pygame.Surface((self.img_width, self.img_height))
+        self.mask = pygame.mask.from_surface(self.poptart)
+
+    @property
+    def rect(self):
+        """Get the cat's position, width, and height, as a pygame.Rect."""
+        return Rect(self.pos_x, self.pos_y, self.img_width, self.img_height)
 
     def draw(self, screen):
         """ get the drawables that makeup the Nyan Cat Player """
@@ -58,6 +68,13 @@ class Cat(pygame.sprite.Sprite):
     def update(self, delta_t):
         self.pos_x += self.vel_x*delta_t
         self.pos_y += self.vel_y*delta_t
+
+    def collides_with(self, circle):
+        """Get whether the cat collides with a circle in this Circle class.
+        Arguments:
+        cat: The cat that should be tested for collision with this circle.
+        """
+        return pygame.sprite.spritecollide(self, circle, False)
 
 class NyanView():
     def __init__(self, model, width, height):
@@ -75,14 +92,12 @@ class NyanView():
     def draw(self):
         """ Redraw the full game window """
         self.screen.fill((0,51,102))
-        # Draw the walls of the game
-        wall_color = (255,20,147)
-        wall_thick = 20
-        wall_margin = 50
-        # Draw top wall
-        pygame.draw.rect(self.screen, wall_color, (0,wall_margin,self.width,wall_thick),0)
-        # Draw bottom wall
-        pygame.draw.rect(self.screen, wall_color, (0,self.height-wall_margin-wall_thick,self.width,wall_thick),0)
+
+        ## Draw the walls of the game
+        # Draw wall1 (top)
+        pygame.draw.rect(self.screen, self.model.wall_color, (0,self.model.wall1_outer_y_pos,self.width,self.model.wall_thick),0)
+        # Draw wall2 (bottom)
+        pygame.draw.rect(self.screen, self.model.wall_color, (0,self.model.wall2_inner_y_pos,self.width,self.model.wall_thick),0)
        
         for circle in self.model.circles:
             pygame.draw.circle(self.screen, circle.color, (int(circle.pos_x),int(circle.pos_y)), 15, 0)
@@ -100,6 +115,15 @@ class Circle(pygame.sprite.Sprite):
         color_converter = [(144,245,0),(7,185,152),(192,16,191),(255,230,59)]
         self.color = color_converter[rand_color]
 
+        # for collision detection
+        self.circ = pygame.Surface((15, 15))
+        self.mask = pygame.mask.from_surface(self.circ)
+
+    @property
+    def rect(self):
+        """Get the Rect which contains this circle."""
+        return Rect(self.pos_x, self.pos_y, 15, 15)
+
     def update(self, delta_t):
         self.pos_x -= self.vel_x*delta_t
         self.pos_y += self.vel_y*delta_t
@@ -110,6 +134,16 @@ class Model():
         self.height = height
         self.cat = CatPlayer(self.width,self.height)
         self.circles = []
+        self.screen = pygame.display.set_mode((width, height))
+        
+        # Define the wall position
+        self.wall_color = (255,20,147)
+        self.wall_thick = 20
+        self.wall_margin = 50
+        self.wall1_outer_y_pos = self.wall_margin
+        self.wall1_inner_y_pos = self.wall_margin+self.wall_thick
+        self.wall2_inner_y_pos = self.height-self.wall_margin-self.wall_thick
+        self.wall2_inner_y_pos = self.height-self.wall_margin
         self.notPressed = True
 
     def update(self, delta_t):
@@ -119,6 +153,21 @@ class Model():
         make_circle = random.randint(0,2000)
         if make_circle == 2000 and self.notPressed:
             self.circles.append(Circle(self.width, self.height))
+
+        ### Check for collisions of cat into any circle or inner walls
+        circle_collision = self.cat.catplayer.collides_with(self.circles)
+        if len(circle_collision) != 0:
+            print 'BANG circle!'
+        if (self.cat.catplayer.pos_y <= self.wall1_inner_y_pos):
+            print 'BANG WALL1'
+        if (self.cat.catplayer.pos_y >= self.wall2_inner_y_pos):
+            print 'BANG Wall2'
+
+        ### Creates the rectangles behind the circles
+        for c in self.circles:
+            self.screen.blit(c.circ, c.rect)
+
+        self.screen.blit(self.cat.catplayer.poptart, self.cat.catplayer.rect)
 
     def switchMode(self):
         for circle in self.circles:
