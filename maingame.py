@@ -89,7 +89,7 @@ class NyanView():
 
         self.model.cat.catplayer.draw(self.screen)
 
-class Circle():
+class Circle(pygame.sprite.Sprite):
     def __init__(self, width, height):
         self.screen = pygame.display.set_mode((width, height))
         self.pos_x = width
@@ -133,7 +133,6 @@ class NyanCat():
         self.model = Model(self.width, self.height)
         self.view = NyanView(self.model, self.width, self.height)
         self.controller = PygameKeyboardController(self.model)
-        # we will code the controller later
 
     def run(self):
         """ the main runloop... loop until death """
@@ -154,6 +153,7 @@ class PygameKeyboardController():
         self.model = model
 
     def process_events(self):
+        #change this to be self.model.switchmode which is a function that has all of the changes
         pygame.event.pump()
         if (pygame.mouse.get_pressed()[0]):
             self.model.cat.vel_x = 0
