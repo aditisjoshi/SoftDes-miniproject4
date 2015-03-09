@@ -33,11 +33,13 @@ class CatPlayer():
         """ Initialize the player """
         self.width = width
         self.height = height
-        self.catplayer = Cat(self.width/3,self.height/2)
+        self.playerrepresentation = Cat(self.width/3,self.height/2)
 
     def update(self, delta_t):
         """ Updates the model and its constituent parts """
-        self.catplayer.update(delta_t)
+        self.playerrepresentation.update(delta_t)
+
+################################################################################ HERE STARTS ALL THE OBJECTS TO BE DRAWN (cat, walls, circles)
 
 class Cat(pygame.sprite.Sprite):
     """ Represents the player in the game (the Nyan Cat) """
@@ -66,6 +68,7 @@ class Cat(pygame.sprite.Sprite):
         screen.blit(self.image, self.image.get_rect().move(self.pos_x, self.pos_y))
 
     def update(self, delta_t):
+        """Updates the players representation (the Nyan Cat)'s position """
         self.pos_x += self.vel_x*delta_t
         self.pos_y += self.vel_y*delta_t
 
@@ -76,7 +79,118 @@ class Cat(pygame.sprite.Sprite):
         """
         return pygame.sprite.spritecollide(self, circle, False)
 
+class Walls():
+    """ creating a class for the walls"""
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+
+        # Define the wall position
+        self.wall_color = (255,20,147)
+        self.wall_thick = 20
+        self.wall_margin = 50
+        self.wall1_outer_y_pos = self.wall_margin
+        self.wall1_inner_y_pos = self.wall_margin+self.wall_thick
+        self.wall2_outer_y_pos = self.height-self.wall_margin-self.wall_thick
+        self.wall2_inner_y_pos = self.height-self.wall_margin
+
+    def draw(self, screen):
+        """Draw the walls of the game"""
+        # Draw wall1 (top)
+        pygame.draw.rect(screen, self.wall_color, (0,self.wall1_outer_y_pos,self.width,self.wall_thick),0)
+        # Draw wall2 (botto)
+        pygame.draw.rect(screen, self.wall_color, (0,self.wall2_inner_y_pos,self.width,self.wall_thick),0)
+
+class Circle(pygame.sprite.Sprite):
+    """ the Cat is one sprite, the Circles are the second sprite"""
+    def __init__(self, width, height):
+        """ Intialize the view for the circles. The color is randomly generated and the y position is random (inside the walls)
+            this also takes in the wall position/color but the model draws them """
+        self.width = width
+        self.height = height
+        self.radius = 15
+        #taking in wall information so that they know where to draw the circles
+        self.walls = Walls(self.width, self.height)
+        self.pos_x = width
+        self.pos_y = random.randint(self.walls.wall1_inner_y_pos+self.radius,self.walls.wall2_inner_y_pos-self.radius)
+        self.vel_y = 0
+        self.vel_x = 50
+        rand_color = random.randint(0,3)
+        color_converter = [(144,245,0),(7,185,152),(192,16,191),(255,230,59)]
+        self.color = color_converter[rand_color]
+
+        # for collision detection
+        self.circ = pygame.Surface((self.radius, self.radius))
+        self.mask = pygame.mask.from_surface(self.circ)
+
+    @property
+    def rect(self):
+        """Get the Rect which contains this circle."""
+        return Rect(self.pos_x, self.pos_y, self.radius, self.radius)
+
+    def draw(self, screen):
+        """ drawing the circles """
+        pygame.draw.circle(screen, self.color, (int(self.pos_x),int(self.pos_y)), self.radius, 0)
+
+    def update(self, delta_t):
+        """updates the circles position according to time"""
+        self.pos_x -= 10*self.vel_x*delta_t
+        self.pos_y += 10*self.vel_y*delta_t
+
+################################################################################ HERE STARTS THE MODEL
+
+class Model():
+    """the model of the game (takes in the two sprites - the circles and the cat)"""
+    def __init__(self, width, height):
+        """ititalizaing the model with bot the circles (and empty list) and the cat as well as drawing the walls"""
+        self.width = width
+        self.height = height
+        self.cat = CatPlayer(self.width,self.height)
+        self.circles = []
+        self.walls = Walls(self.width, self.height)
+        self.screen = pygame.display.set_mode((width, height))
+        self.notPressed = True
+
+    def update(self, delta_t):
+        """ updates the state of the cat clone and of the circles """
+        self.cat.update(delta_t)
+        for circle in self.circles:
+            circle.update(delta_t)
+        make_circle = random.randint(0,2000)
+        if make_circle == 2000 and self.notPressed:
+            self.circles.append(Circle(self.width, self.height))
+
+        ### Check for collisions of cat into any circle or inner walls
+        circle_collision = self.cat.playerrepresentation.collides_with(self.circles)
+        if len(circle_collision) != 0:
+            print 'BANG circle!'
+        if (self.cat.playerrepresentation.pos_y <= self.walls.wall1_inner_y_pos):
+            print 'BANG WALL1'
+        if (self.cat.playerrepresentation.pos_y >= self.walls.wall2_inner_y_pos):
+            print 'BANG Wall2'
+
+        ### Creates the rectangles behind the circles
+        for c in self.circles:
+            self.screen.blit(c.circ, c.rect)
+
+        self.screen.blit(self.cat.playerrepresentation.poptart, self.cat.playerrepresentation.rect)
+
+    def switchMode(self):
+        """what id does when you hold the mouse down"""
+        for circle in self.circles:
+            circle.vel_x = 0
+        #stop drawing circles
+
+    def returnMode(self):
+        """returning back to state after mouse down"""
+        for circle in self.circles:
+            circle.vel_x = 50
+        #start drawing circles
+
+################################################################################ HERE STARTS THE VIEW
+
 class NyanView():
+    """the view of the game"""
     def __init__(self, model, width, height):
         """ Initialize the view for Nyan Cat.  The input model
             is necessary to find the position of relevant objects
@@ -91,94 +205,19 @@ class NyanView():
 
     def draw(self):
         """ Redraw the full game window """
+
+        #drawing the screen
         self.screen.fill((0,51,102))
 
-        ## Draw the walls of the game
-        # Draw wall1 (top)
-        pygame.draw.rect(self.screen, self.model.wall_color, (0,self.model.wall1_outer_y_pos,self.width,self.model.wall_thick),0)
-        # Draw wall2 (bottom)
-        pygame.draw.rect(self.screen, self.model.wall_color, (0,self.model.wall2_inner_y_pos,self.width,self.model.wall_thick),0)
+        #drawing the walls
+        self.model.walls.draw(self.screen)
+
+        #drawing the cat
+        self.model.cat.playerrepresentation.draw(self.screen)
        
+        #drawing the circles
         for circle in self.model.circles:
-            pygame.draw.circle(self.screen, circle.color, (int(circle.pos_x),int(circle.pos_y)), 15, 0)
-
-        self.model.cat.catplayer.draw(self.screen)
-
-class Circle(pygame.sprite.Sprite):
-    def __init__(self, width, height):
-        self.screen = pygame.display.set_mode((width, height))
-        self.pos_x = width
-        self.pos_y = random.randint(0,height)
-        self.vel_y = 0
-        self.vel_x = 50
-        rand_color = random.randint(0,3)
-        color_converter = [(144,245,0),(7,185,152),(192,16,191),(255,230,59)]
-        self.color = color_converter[rand_color]
-
-        # for collision detection
-        self.circ = pygame.Surface((15, 15))
-        self.mask = pygame.mask.from_surface(self.circ)
-
-    @property
-    def rect(self):
-        """Get the Rect which contains this circle."""
-        return Rect(self.pos_x, self.pos_y, 15, 15)
-
-    def update(self, delta_t):
-        self.pos_x -= self.vel_x*delta_t
-        self.pos_y += self.vel_y*delta_t
-
-class Model():
-    def __init__(self, width, height):
-        self.width = width
-        self.height = height
-        self.cat = CatPlayer(self.width,self.height)
-        self.circles = []
-        self.screen = pygame.display.set_mode((width, height))
-        
-        # Define the wall position
-        self.wall_color = (255,20,147)
-        self.wall_thick = 20
-        self.wall_margin = 50
-        self.wall1_outer_y_pos = self.wall_margin
-        self.wall1_inner_y_pos = self.wall_margin+self.wall_thick
-        self.wall2_inner_y_pos = self.height-self.wall_margin-self.wall_thick
-        self.wall2_inner_y_pos = self.height-self.wall_margin
-        self.notPressed = True
-
-    def update(self, delta_t):
-        self.cat.update(delta_t)
-        for circle in self.circles:
-            circle.update(delta_t)
-        make_circle = random.randint(0,2000)
-        if make_circle == 2000 and self.notPressed:
-            self.circles.append(Circle(self.width, self.height))
-
-        ### Check for collisions of cat into any circle or inner walls
-        circle_collision = self.cat.catplayer.collides_with(self.circles)
-        if len(circle_collision) != 0:
-            print 'BANG circle!'
-        if (self.cat.catplayer.pos_y <= self.wall1_inner_y_pos):
-            print 'BANG WALL1'
-        if (self.cat.catplayer.pos_y >= self.wall2_inner_y_pos):
-            print 'BANG Wall2'
-
-        ### Creates the rectangles behind the circles
-        for c in self.circles:
-            self.screen.blit(c.circ, c.rect)
-
-        self.screen.blit(self.cat.catplayer.poptart, self.cat.catplayer.rect)
-
-    def switchMode(self):
-        for circle in self.circles:
-            circle.vel_x = 0
-        #stop drawing circles
-
-    def returnMode(self):
-        for circle in self.circles:
-            circle.vel_x = 50
-        #start drawing circles
-
+            circle.draw(self.screen)
 
 ################################################################################
 
