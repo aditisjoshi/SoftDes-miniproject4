@@ -110,22 +110,25 @@ class Model():
         self.height = height
         self.cat = CatPlayer(self.width,self.height)
         self.circles = []
+        self.notPressed = True
 
     def update(self, delta_t):
         self.cat.update(delta_t)
         for circle in self.circles:
             circle.update(delta_t)
         make_circle = random.randint(0,2000)
-        if make_circle == 2000:
+        if make_circle == 2000 and self.notPressed:
             self.circles.append(Circle(self.width, self.height))
 
     def switchMode(self):
         for circle in self.circles:
             circle.vel_x = 0
+        #stop drawing circles
 
     def returnMode(self):
         for circle in self.circles:
             circle.vel_x = 50
+        #start drawing circles
 
 
 ################################################################################
@@ -164,10 +167,12 @@ class PygameKeyboardController():
         pygame.event.pump()
         if (pygame.mouse.get_pressed()[0]):
             self.model.switchMode()
+            self.model.notPressed = False
         else:
             self.model.returnMode()
+            self.model.notPressed = True
 
 
 if __name__ == '__main__':
-    cat = NyanCat()
-    cat.run()
+    game = NyanCat()
+    game.run()
