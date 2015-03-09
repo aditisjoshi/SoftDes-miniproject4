@@ -32,7 +32,7 @@ class CatPlayer():
         """ Initialize the player """
         self.width = width
         self.height = height
-        self.catplayer = Cat(0,100)
+        self.cat = Cat(self.width/3,self.height/2)
 
     def update(self, delta_t):
         """ Updates the model and its constituent parts """
@@ -45,7 +45,7 @@ class Cat(pygame.sprite.Sprite):
             pos_x, pos_y """
         self.pos_x = pos_x
         self.pos_y = pos_y
-        self.vel_x = 50
+        self.vel_x = 0
         self.vel_y = 0
         # TODO: don't depend on relative path
         self.image = pygame.image.load('nyan_cat.png')
@@ -101,7 +101,7 @@ class Circle(pygame.sprite.Sprite):
         self.color = color_converter[rand_color]
 
     def update(self, delta_t):
-        self.pos_x += self.vel_x*delta_t
+        self.pos_x -= self.vel_x*delta_t
         self.pos_y += self.vel_y*delta_t
 
 class Model():
@@ -143,6 +143,7 @@ class NyanCat():
             delta_t = time.time() - last_update
             pygame.display.update()
             self.model.update(delta_t)
+            self.circles.update(delta_t)
             self.controller.process_events()
             last_update = time.time()
 
@@ -163,6 +164,7 @@ class PygameKeyboardController():
             self.model.cat.vel_x = 50
             for circle in self.model.circles:
                 circle.vel_x = 50
+
 
 if __name__ == '__main__':
     cat = NyanCat()
