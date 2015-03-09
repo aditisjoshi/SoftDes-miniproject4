@@ -11,7 +11,7 @@ import time
 
 
 
-class DrawableSurface():
+class DrawableSurface(object):
     """ A class that wraps a pygame.Surface and a pygame.Rect """
 
     def __init__(self, surface, rect):
@@ -27,12 +27,13 @@ class DrawableSurface():
         """ Get the rect """
         return self.rect
 
-class CatPlayer():
+class CatPlayer(object):
     """ Represents the game state of our Nyan Cat clone """
     def __init__(self, width, height):
         """ Initialize the player """
         self.width = width
         self.height = height
+        # sets the starting position of the cat
         self.catplayer = Cat(self.width/3,self.height/2)
 
     def update(self, delta_t):
@@ -76,7 +77,7 @@ class Cat(pygame.sprite.Sprite):
         """
         return pygame.sprite.spritecollide(self, circle, False)
 
-class NyanView():
+class NyanView(object):
     def __init__(self, model, width, height):
         """ Initialize the view for Nyan Cat.  The input model
             is necessary to find the position of relevant objects
@@ -128,7 +129,7 @@ class Circle(pygame.sprite.Sprite):
         self.pos_x -= self.vel_x*delta_t
         self.pos_y += self.vel_y*delta_t
 
-class Model():
+class Model(object):
     def __init__(self, width, height):
         self.width = width
         self.height = height
@@ -182,7 +183,7 @@ class Model():
 
 ################################################################################
 
-class NyanCat():
+class NyanCat(object):
     """ The main Nyan Cat class """
 
     def __init__(self):
@@ -208,7 +209,7 @@ class NyanCat():
 
 ################################################################################
 
-class PygameKeyboardController():
+class PygameKeyboardController(object):
     def __init__(self, model):
         self.model = model
 
