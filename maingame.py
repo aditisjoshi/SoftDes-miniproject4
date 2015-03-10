@@ -197,6 +197,11 @@ class Model(object):
             # draw a line from the cat to the closest circle
             pygame.draw.line(self.screen, closest_circle.color, (cat_position), (closest_circle.pos_x,closest_circle.pos_y),2)
             pygame.display.update()
+            """ need to remove the display update from this function so that the
+            flickering stops.
+            Should also try to make the line connect to the center of the cat, instead
+            of the top left corner.
+            """
 
         #stop drawing circles
 
