@@ -8,10 +8,11 @@ import pygame
 from pygame.locals import *
 import random
 import time
+from math import sqrt,fabs
 
 
 
-class DrawableSurface():
+class DrawableSurface(object):
     """ A class that wraps a pygame.Surface and a pygame.Rect """
 
     def __init__(self, surface, rect):
@@ -27,7 +28,7 @@ class DrawableSurface():
         """ Get the rect """
         return self.rect
 
-class CatPlayer():
+class CatPlayer(object):
     """ Represents the game state of our Nyan Cat clone """
     def __init__(self, width, height):
         """ Initialize the player """
@@ -79,7 +80,7 @@ class Cat(pygame.sprite.Sprite):
         """
         return pygame.sprite.spritecollide(self, circle, False)
 
-class Walls():
+class Walls(object):
     """ creating a class for the walls"""
     def __init__(self, width, height):
         self.width = width
@@ -98,7 +99,7 @@ class Walls():
         """Draw the walls of the game"""
         # Draw wall1 (top)
         pygame.draw.rect(screen, self.wall_color, (0,self.wall1_outer_y_pos,self.width,self.wall_thick),0)
-        # Draw wall2 (botto)
+        # Draw wall2 (bottom)
         pygame.draw.rect(screen, self.wall_color, (0,self.wall2_inner_y_pos,self.width,self.wall_thick),0)
 
 class Circle(pygame.sprite.Sprite):
@@ -109,10 +110,13 @@ class Circle(pygame.sprite.Sprite):
         self.width = width
         self.height = height
         self.radius = 15
-        #taking in wall information so that they know where to draw the circles
+        
+        # taking in wall information so that they know where to draw the circles
         self.walls = Walls(self.width, self.height)
-        self.pos_x = width
-        self.pos_y = random.randint(self.walls.wall1_inner_y_pos+self.radius,self.walls.wall2_inner_y_pos-self.radius)
+        self.pos_x = self.width
+        lower_bound = self.walls.wall1_inner_y_pos+(self.radius*2)
+        upper_bound = self.walls.wall2_inner_y_pos-(self.radius*2)
+        self.pos_y = random.randint(lower_bound, upper_bound)
         self.vel_y = 0
         self.vel_x = 50
         rand_color = random.randint(0,3)
@@ -139,7 +143,7 @@ class Circle(pygame.sprite.Sprite):
 
 ################################################################################ HERE STARTS THE MODEL
 
-class Model():
+class Model(object):
     """the model of the game (takes in the two sprites - the circles and the cat)"""
     def __init__(self, width, height):
         """ititalizaing the model with bot the circles (and empty list) and the cat as well as drawing the walls"""
@@ -176,13 +180,29 @@ class Model():
         self.screen.blit(self.cat.playerrepresentation.poptart, self.cat.playerrepresentation.rect)
 
     def switchMode(self):
-        """what id does when you hold the mouse down"""
+        """what it does when you hold the mouse down"""
+        dist_dict = {}
+        cat_position = [self.cat.playerrepresentation.pos_x, self.cat.playerrepresentation.pos_y]
+
+        # stops the circles from moving
         for circle in self.circles:
             circle.vel_x = 0
+
+            # calculate the distances between the circle and the cat
+            dist = sqrt(fabs(float(((cat_position[0])**2 - (circle.pos_x)**2) + ((cat_position[1])**2 - (circle.pos_y)**2))))
+            dist_dict[circle] = dist
+        
+        # find the smallest distance from the cat
+        closest_circle = min(dist_dict, key=dist_dict.get)
+        
+        # draw a line from the cat to the closest circle
+        pygame.draw.line(self.screen, closest_circle.color, (cat_position), (closest_circle.pos_x,closest_circle.pos_y),10)
+
         #stop drawing circles
 
     def returnMode(self):
         """returning back to state after mouse down"""
+        # makes the circles move again
         for circle in self.circles:
             circle.vel_x = 50
         #start drawing circles
