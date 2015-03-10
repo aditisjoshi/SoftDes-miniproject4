@@ -185,18 +185,18 @@ class Model(object):
         cat_position = [self.cat.playerrepresentation.pos_x, self.cat.playerrepresentation.pos_y]
 
         # stops the circles from moving
-        for circle in self.circles:
-            circle.vel_x = 0
-
-            # calculate the distances between the circle and the cat
-            dist = sqrt(fabs(float(((cat_position[0])**2 - (circle.pos_x)**2) + ((cat_position[1])**2 - (circle.pos_y)**2))))
-            dist_dict[circle] = dist
+        if len(self.circles) > 0:
+            for circle in self.circles:
+                circle.vel_x = 0
+                # calculate the distances between the circle and the cat
+                dist = sqrt(fabs(float(((cat_position[0])**2 - (circle.pos_x)**2) + ((cat_position[1])**2 - (circle.pos_y)**2))))
+                dist_dict[circle] = dist
         
-        # find the smallest distance from the cat
-        closest_circle = min(dist_dict, key=dist_dict.get)
-        
-        # draw a line from the cat to the closest circle
-        pygame.draw.line(self.screen, closest_circle.color, (cat_position), (closest_circle.pos_x,closest_circle.pos_y),10)
+            # find the smallest distance from the cat
+            closest_circle = min(dist_dict, key=dist_dict.get)
+            # draw a line from the cat to the closest circle
+            pygame.draw.line(self.screen, closest_circle.color, (cat_position), (closest_circle.pos_x,closest_circle.pos_y),2)
+            pygame.display.update()
 
         #stop drawing circles
 
