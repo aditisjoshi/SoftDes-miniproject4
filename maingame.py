@@ -73,7 +73,9 @@ class Cat(pygame.sprite.Sprite):
         self.pos_y += vel_y*delta_t
 
     def move_circle(self,circ_dist,x_diff,status):
-        """ update the cat's position when you've clicked """
+        """ update the cat's velocity when the mouse is clicked so that a
+        circular path can be followed"""
+        
         # finding theta
         while not status:
             theta = acos(x_diff/circ_dist)
@@ -199,7 +201,7 @@ class Model(object):
         if len(circle_collision) != 0:
             print 'BANG circle!'
 
-        ### Check for collisions of cat into any circle or inner walls
+        # Check for collisions of cat into any circle or inner walls
         if self.notPressed:
             if (self.cat.playerrepresentation.pos_y <= self.walls.wall1_inner_y_pos):
                 print 'BANG WALL1'
@@ -221,7 +223,7 @@ class Model(object):
         if len(self.allcircles) > 0:
             for circle in self.allcircles:
                 circle.vel_x = 0
-            # calculate the distances between the circle and the cat
+            # calculates the distance between the circle and the cat and the difference between their x pos.
             (circ_dist, x_diff) = self.circles.find_closest(self.allcircles,center_cat, self.screen)
 
             # calculate the path and move the cat around the circle
@@ -268,7 +270,7 @@ class NyanView():
         for circle in self.model.allcircles:
             circle.draw(self.screen)
 
-################################################################################
+################################################################################ GAME ON!
 
 class NyanCat():
     """ The main Nyan Cat class """
@@ -296,13 +298,14 @@ class NyanCat():
             if self.model.notPressed:
                 self.model.update(delta_t, 0, 0)
             else:
+                # Do something to count the first entry of this state
                 self.model.switchMode(delta_t)
                 pygame.display.update()
-
+                # Do not re-enter this loop unless it follows a notPressed mode
 
 ################################################################################
 
-class PygameKeyboardController():
+class PygameKeyboardController(object):
     def __init__(self, model):
         self.model = model
 
