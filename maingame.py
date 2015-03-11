@@ -65,18 +65,18 @@ class Cat(pygame.sprite.Sprite):
         """ get the drawables that makeup the Nyan Cat Player """
         screen.blit(self.image, self.image.get_rect().move(self.pos_x, self.pos_y))
 
-    def move_circle(self,circ_dist,theta):
-        """ update the cat's position when you've clicked """
-        angular_vel = 50
-        linear_vel = angular_vel * circ_dist
-        vel_x = linear_vel * cos(theta)
-        vel_y = linear_vel * sin(theta)
-        return (vel_x, vel_y)
-
     def update(self, delta_t, vel_x, vel_y): 
         """Updates the players representation (the Nyan Cat)'s position """
         self.pos_x += vel_x*delta_t
         self.pos_y += vel_y*delta_t
+
+    def move_circle(self,circ_dist,theta):
+        """ update the cat's position when you've clicked """
+        angular_vel = 1
+        linear_vel = angular_vel * circ_dist
+        vel_x = linear_vel * cos(theta)
+        vel_y = linear_vel * sin(theta)
+        return (vel_x, vel_y)
 
     def collides_with(self, circle):
         """Get whether the cat collides with a circle in this Circle class.
@@ -199,16 +199,20 @@ class Model(object):
                 dist = sqrt(fabs((center_cat[0]-circle.pos_x)**2 + (center_cat[1]-circle.pos_y)**2))
                 dist_dict[circle] = dist
         
-        # find the smallest distance from the cat
-        closest_circle = min(dist_dict, key=dist_dict.get)
+            # find the smallest distance from the cat
+            closest_circle = min(dist_dict, key=dist_dict.get)
 
-        # finding theta
-        closest_circle_theta = atan(closest_circle.pos_x/closest_circle.pos_y)
+            # finding theta
+            closest_circle_theta = atan(closest_circle.pos_x/closest_circle.pos_y)
 
-        # draw a line from the cat to the closest circle
-        pygame.draw.line(self.screen, closest_circle.color, center_cat, (closest_circle.pos_x,closest_circle.pos_y),2)
+            # draw a line from the cat to the closest circle
+            pygame.draw.line(self.screen, closest_circle.color, center_cat, (closest_circle.pos_x,closest_circle.pos_y),2)
 
-        (vel_x, vel_y) = self.cat.playerrepresentation.move_circle(dist_dict[closest_circle],closest_circle_theta)
+            (vel_x, vel_y) = self.cat.playerrepresentation.move_circle(dist_dict[closest_circle],closest_circle_theta)
+
+            # have to call the UPDATE function on cat 
+            delta_t = 10
+            self.cat.playerrepresentation.update(delta_t,vel_x,vel_y)
 
     def returnMode(self):
         """returning back to state after mouse down"""
