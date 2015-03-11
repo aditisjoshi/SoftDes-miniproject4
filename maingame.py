@@ -160,8 +160,8 @@ class Model(object):
         self.cat.update(delta_t)
         for circle in self.circles:
             circle.update(delta_t)
-        make_circle = random.randint(0,2000)
-        if make_circle == 2000 and self.notPressed:
+        make_circle = random.randint(0,1000)
+        if make_circle == 1000 and self.notPressed:
             self.circles.append(Circle(self.width, self.height))
 
         ### Check for collisions of cat into any circle or inner walls
@@ -189,11 +189,12 @@ class Model(object):
             for circle in self.circles:
                 circle.vel_x = 0
                 # calculate the distances between the circle and the cat
-                dist = sqrt(fabs(float(((center_cat[0])**2 - (circle.pos_x)**2) + ((center_cat[1])**2 - (circle.pos_y)**2))))
+                dist = sqrt(fabs((center_cat[0]-circle.pos_x)**2 + (center_cat[1]-circle.pos_y)**2))
                 dist_dict[circle] = dist
         
             # find the smallest distance from the cat
             closest_circle = min(dist_dict, key=dist_dict.get)
+            print dist_dict[closest_circle]
             # draw a line from the cat to the closest circle
             pygame.draw.line(self.screen, closest_circle.color, center_cat, (closest_circle.pos_x,closest_circle.pos_y),2)
             pygame.display.update()
