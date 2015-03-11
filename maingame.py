@@ -195,7 +195,6 @@ class Model(object):
             # find the smallest distance from the cat
             closest_circle = min(dist_dict, key=dist_dict.get)
             # draw a line from the cat to the closest circle
-            
             pygame.draw.line(self.screen, closest_circle.color, center_cat, (closest_circle.pos_x,closest_circle.pos_y),2)
             pygame.display.update()
 
