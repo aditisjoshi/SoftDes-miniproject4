@@ -160,7 +160,7 @@ class Model(object):
         self.screen = pygame.display.set_mode((width, height))
         self.notPressed = True
 
-    def update(self, delta_t):
+    def update(self, delta_t, vel_x, vel_y):
         """ updates the state of the cat clone and of the circles """
         self.cat.update(delta_t, 0, 0)
         for circle in self.circles:
@@ -199,20 +199,16 @@ class Model(object):
                 dist = sqrt(fabs((center_cat[0]-circle.pos_x)**2 + (center_cat[1]-circle.pos_y)**2))
                 dist_dict[circle] = dist
         
-            # find the smallest distance from the cat
-            closest_circle = min(dist_dict, key=dist_dict.get)
+        # find the smallest distance from the cat
+        closest_circle = min(dist_dict, key=dist_dict.get)
 
-            # finding theta
-            closest_circle_theta = atan(closest_circle.pos_x/closest_circle.pos_y)
+        # finding theta
+        closest_circle_theta = atan(closest_circle.pos_x/closest_circle.pos_y)
 
-            # draw a line from the cat to the closest circle
-            pygame.draw.line(self.screen, closest_circle.color, center_cat, (closest_circle.pos_x,closest_circle.pos_y),2)
+        # draw a line from the cat to the closest circle
+        pygame.draw.line(self.screen, closest_circle.color, center_cat, (closest_circle.pos_x,closest_circle.pos_y),2)
 
-        """ need to remove the display update from this function so that the
-        flickering stops.
-        """
-
-        #stop drawing circles
+        (vel_x, vel_y) = self.cat.playerrepresentation.move_circle(dist_dict[closest_circle],closest_circle_theta)
 
     def returnMode(self):
         """returning back to state after mouse down"""
@@ -276,7 +272,7 @@ class NyanCat():
             delta_t = time.time() - last_update
             self.controller.process_events()
             pygame.display.update()
-            self.model.update(delta_t)
+            self.model.update(delta_t, 0, 0)
             last_update = time.time()
 
 ################################################################################
