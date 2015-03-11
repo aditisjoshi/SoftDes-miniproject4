@@ -217,18 +217,21 @@ class Model(object):
         cat_position = [self.cat.playerrepresentation.pos_x, self.cat.playerrepresentation.pos_y]
         center_cat = [cat_position[0]+self.cat.playerrepresentation.img_width/2, cat_position[1]+self.cat.playerrepresentation.img_height/2]
         # stops the circles from moving
+        print self.cat.playerrepresentation.vel_x
         if len(self.allcircles) > 0 and self.cat.playerrepresentation.vel_x == 0:
             for circle in self.allcircles:
                 circle.vel_x = 0
-                # calculate the distances between the circle and the cat
-            print "test"
+            # calculate the distances between the circle and the cat
             (circ_dist, x_diff) = self.circles.find_closest(self.allcircles,center_cat, self.screen)
 
-        # calculate the path and move the cat around the circle
-        (vel_x, vel_y) = self.cat.playerrepresentation.move_circle(circ_dist,x_diff,self.notPressed)
+            # calculate the path and move the cat around the circle
+            (vel_x, vel_y) = self.cat.playerrepresentation.move_circle(circ_dist,x_diff,self.notPressed)
+            self.cat.playerrepresentation.vel_x = vel_x
+            self.cat.playerrepresentation.vel_y = vel_y
 
-        # have to call the UPDATE function on cat 
-        self.cat.playerrepresentation.update(delta_t,vel_x,vel_y)
+        if self.cat.playerrepresentation != 0:
+            # have to call the UPDATE function on cat 
+            self.cat.playerrepresentation.update(delta_t,self.cat.playerrepresentation.vel_x,self.cat.playerrepresentation.vel_x)
 
     def returnMode(self):
         """returning back to state after mouse down"""
