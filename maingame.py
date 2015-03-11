@@ -8,8 +8,7 @@ import pygame
 from pygame.locals import *
 import random
 import time
-from math import sqrt,fabs
-
+from math import sqrt,fabs, cos, sin, atan
 
 
 class DrawableSurface(object):
@@ -36,9 +35,9 @@ class CatPlayer(object):
         self.height = height
         self.playerrepresentation = Cat(self.width/3,self.height/2)
 
-    def update(self, delta_t):
+    def update(self, delta_t, vel_x, vel_y):
         """ Updates the model and its constituent parts """
-        self.playerrepresentation.update(delta_t)
+        self.playerrepresentation.update(delta_t, vel_x, vel_y)
 
 ################################################################################ HERE STARTS ALL THE OBJECTS TO BE DRAWN (cat, walls, circles)
 
@@ -51,8 +50,6 @@ class Cat(pygame.sprite.Sprite):
         self.img_height = 89
         self.pos_x = pos_x
         self.pos_y = pos_y
-        self.vel_x = 0
-        self.vel_y = 0
         # TODO: don't depend on relative path
         self.image = pygame.image.load('nyan_cat.png')
         self.image.set_colorkey((255,255,255)) 
@@ -68,10 +65,18 @@ class Cat(pygame.sprite.Sprite):
         """ get the drawables that makeup the Nyan Cat Player """
         screen.blit(self.image, self.image.get_rect().move(self.pos_x, self.pos_y))
 
-    def update(self, delta_t):
+    def move_circle(self,circ_dist,theta):
+        """ update the cat's position when you've clicked """
+        angular_vel = 50
+        linear_vel = angular_vel * circ_dist
+        vel_x = linear_vel * cos(theta)
+        vel_y = linear_vel * sin(theta)
+        return (vel_x, vel_y)
+
+    def update(self, delta_t, vel_x, vel_y): 
         """Updates the players representation (the Nyan Cat)'s position """
-        self.pos_x += self.vel_x*delta_t
-        self.pos_y += self.vel_y*delta_t
+        self.pos_x += vel_x*delta_t
+        self.pos_y += vel_y*delta_t
 
     def collides_with(self, circle):
         """Get whether the cat collides with a circle in this Circle class.
@@ -157,21 +162,23 @@ class Model(object):
 
     def update(self, delta_t):
         """ updates the state of the cat clone and of the circles """
-        self.cat.update(delta_t)
+        self.cat.update(delta_t, 0, 0)
         for circle in self.circles:
             circle.update(delta_t)
         make_circle = random.randint(0,2000)
         if make_circle == 2000 and self.notPressed:
             self.circles.append(Circle(self.width, self.height))
 
-        ### Check for collisions of cat into any circle or inner walls
         circle_collision = self.cat.playerrepresentation.collides_with(self.circles)
         if len(circle_collision) != 0:
             print 'BANG circle!'
-        if (self.cat.playerrepresentation.pos_y <= self.walls.wall1_inner_y_pos):
-            print 'BANG WALL1'
-        if (self.cat.playerrepresentation.pos_y >= self.walls.wall2_inner_y_pos):
-            print 'BANG Wall2'
+
+        ### Check for collisions of cat into any circle or inner walls
+        if self.notPressed:
+            if (self.cat.playerrepresentation.pos_y <= self.walls.wall1_inner_y_pos):
+                print 'BANG WALL1'
+            if (self.cat.playerrepresentation.pos_y >= self.walls.wall2_inner_y_pos-self.cat.playerrepresentation.img_height):
+                print 'BANG Wall2'
 
         ### Creates the rectangles behind the circles
         for c in self.circles:
@@ -194,7 +201,10 @@ class Model(object):
         
             # find the smallest distance from the cat
             closest_circle = min(dist_dict, key=dist_dict.get)
-            print dist_dict[closest_circle]
+
+            # finding theta
+            closest_circle_theta = atan(closest_circle.pos_x/closest_circle.pos_y)
+
             # draw a line from the cat to the closest circle
             pygame.draw.line(self.screen, closest_circle.color, center_cat, (closest_circle.pos_x,closest_circle.pos_y),2)
 
