@@ -1,7 +1,11 @@
 """ 
-Aditi and Jess
+Aditi Joshi and Jessica Sutantio
 SoftDes Mini-Project 4
-Making a side-scrolling game with nyan cat based on One More Line
+Making a side-scrolling game with nyan cat based on the game, One More Line
+
+NyanCat travels through space and time, avoiding the rainbow meteorites. In order to do so, the
+player helps NyanCat maneuver around the colored circles by holding down the mouse button to
+swing around the circles. Don't hit the walls or the circles!
 """
 
 import pygame
