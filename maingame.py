@@ -72,23 +72,22 @@ class Cat(pygame.sprite.Sprite):
         self.pos_x += vel_x*delta_t
         self.pos_y += vel_y*delta_t
 
-    def move_circle(self,circ_dist,x_diff,status):
+    def move_circle(self,x_diff,y_diff,circ_dist):
         """ update the cat's velocity when the mouse is clicked so that a
         circular path can be followed"""
         
         # finding theta
-        while not status:
-            theta = acos(x_diff/circ_dist)
-            # print x_diff
-            # print circ_dist
-            # print theta
-            angular_vel = 10
-            linear_vel = angular_vel * circ_dist
-            vel_x = linear_vel * cos(theta)
-            vel_y = linear_vel * sin(theta)
-            velocity = (vel_x, vel_y)
-            # print velocity
-            return velocity
+        # theta = acos(x_diff/circ_dist
+        # angular_vel = 0.1
+        # linear_vel = angular_vel * circ_dist
+        # vel_x = linear_vel * cos(theta)
+        # vel_y = linear_vel * sin(theta)
+        # velocity = (vel_x, vel_y)
+        # return velocity
+        scalar = 400
+        vel_x = y_diff/circ_dist * scalar
+        vel_y = -x_diff/circ_dist * scalar
+        return (vel_x, vel_y)
 
     def collides_with(self, circle):
         """Get whether the cat collides with a circle in this Circle class.
@@ -157,16 +156,17 @@ class Circle(pygame.sprite.Sprite):
         """ finding the circle closest to the cat """
         dist_dict = {}
         for circle in circles:
-            dist = sqrt(fabs((center_cat[0]-self.pos_x)**2 + (center_cat[1]-self.pos_y)**2))
+            dist = sqrt((center_cat[0]-self.pos_x)**2 + (center_cat[1]-self.pos_y)**2)
             dist_dict[circle] = dist
         # find the smallest distance from the cat
         closest_circle = min(dist_dict, key=dist_dict.get)
-        x_diff = fabs(center_cat[0] - closest_circle.pos_x)
+        x_diff = (center_cat[0] - closest_circle.pos_x)
+        y_diff = (center_cat[1] - closest_circle.pos_y)
 
         # draw a line from the cat to the closest circle
         pygame.draw.line(screen, closest_circle.color, center_cat, (closest_circle.pos_x,closest_circle.pos_y),2)
 
-        return (dist_dict[closest_circle],x_diff)
+        return (x_diff,y_diff,dist_dict[closest_circle])
 
     def update(self, delta_t):
         """updates the circles position according to time"""
@@ -224,10 +224,11 @@ class Model(object):
             for circle in self.allcircles:
                 circle.vel_x = 0
             # calculates the distance between the circle and the cat and the difference between their x pos.
-            (circ_dist, x_diff) = self.circles.find_closest(self.allcircles,center_cat, self.screen)
+            (x_diff, y_diff, circ_dist) = self.circles.find_closest(self.allcircles,center_cat, self.screen)
 
             # calculate the path and move the cat around the circle
-            (vel_x, vel_y) = self.cat.playerrepresentation.move_circle(circ_dist,x_diff,self.notPressed)
+            (vel_x, vel_y) = self.cat.playerrepresentation.move_circle(x_diff,y_diff,circ_dist)
+            print (vel_x, vel_y, circ_dist)
 
             self.cat.playerrepresentation.update(delta_t,vel_x,vel_y)
 
