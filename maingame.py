@@ -225,14 +225,6 @@ class Model(object):
             
             return closest_circle, circ_dist, counter
 
-            # elif counter != 0:
-            #     print counter
-            #     print x_diff
-            #     # calculate the path and move the cat around the circle
-            #     (vel_x, vel_y) = self.cat.playerrepresentation.move_circle(x_diff,y_diff,circ_dist)
-
-            #     self.cat.playerrepresentation.update(delta_t,vel_x,vel_y)
-
     def aroundCircle(self, nearest_circ, diag_dist, delta_t, screen):
         """ move around the closest circle """
         pygame.draw.line(screen, nearest_circ.color, (self.cat.playerrepresentation.pos_x + self.cat.playerrepresentation.img_width/2, self.cat.playerrepresentation.pos_y + self.cat.playerrepresentation.img_height/2), (nearest_circ.pos_x,nearest_circ.pos_y),2)
