@@ -221,7 +221,7 @@ class Model(object):
             counter += 1
             # score is the number of circles you pass by without dying
             score = len(dist_dict)
-
+            
             return closest_circle, circ_dist, counter, score
         
         #the mouse is clicked when there are no circles
@@ -231,9 +231,9 @@ class Model(object):
     def aroundCircle(self, nearest_circ, diag_dist, delta_t, screen):
         """ move around the closest circle """
         # draw a line from the cat to the closest circle
-        pygame.draw.line(screen, nearest_circ.color, self.center_cat, (nearest_circ.pos_x,nearest_circ.pos_y),2)
-        x_diff = (self.center_cat[0] - nearest_circ.pos_x)
-        y_diff = (self.center_cat[1] - nearest_circ.pos_y)
+        pygame.draw.line(screen, nearest_circ.color, (self.cat.playerrepresentation.pos_x + self.cat.playerrepresentation.img_width/2, self.cat.playerrepresentation.pos_y + self.cat.playerrepresentation.img_height/2), (nearest_circ.pos_x,nearest_circ.pos_y),2)
+        x_diff = (self.cat.playerrepresentation.pos_x + self.cat.playerrepresentation.img_width/2 - nearest_circ.pos_x)
+        y_diff = (self.cat.playerrepresentation.pos_y + self.cat.playerrepresentation.img_height/2 - nearest_circ.pos_y)
         circ_dist = diag_dist
         (vel_x, vel_y) = self.cat.playerrepresentation.move_circle(x_diff,y_diff,circ_dist)
         self.cat.playerrepresentation.update(delta_t,vel_x,vel_y)
