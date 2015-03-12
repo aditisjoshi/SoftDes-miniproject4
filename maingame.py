@@ -50,6 +50,8 @@ class Cat(pygame.sprite.Sprite):
         self.img_height = 44.5
         self.pos_x = pos_x
         self.pos_y = pos_y
+        self.cat_position = [pos_x,pos_y]
+        self.center_cat = [self.cat_position[0]+self.img_width/2, self.cat_position[1]+self.img_height/2]
         # TODO: don't depend on relative path
         self.image = pygame.image.load('nyan_cat.png')
         self.image.set_colorkey((255,255,255)) 
@@ -168,7 +170,7 @@ class Circle(pygame.sprite.Sprite):
 
         else:
             
-            
+
             return (x_diff,y_diff,dist_dict[closest_circle])
 
     def update(self, delta_t):
@@ -191,6 +193,7 @@ class Model(object):
         self.screen = pygame.display.set_mode((width, height))
         self.notPressed = True
         self.run = True
+        self.pushnumber = 0
 
     def update(self, delta_t, vel_x, vel_y):
         """ updates the state of the cat clone and of the circles """
@@ -203,14 +206,17 @@ class Model(object):
 
         circle_collision = self.cat.playerrepresentation.collides_with(self.allcircles)
         if len(circle_collision) != 0:
-            self.run = False
+            print 'loss'
+            # self.run = False
 
         # Check for collisions of cat into any circle or inner walls
         if self.notPressed:
             if (self.cat.playerrepresentation.pos_y <= self.walls.wall1_inner_y_pos):
-                self.run = False
+                print 'loss'
+                # self.run = False
             if (self.cat.playerrepresentation.pos_y >= self.walls.wall2_inner_y_pos-self.cat.playerrepresentation.img_height):
-                self.run = False
+                print 'loss'
+                # self.run = False
 
         ### Creates the rectangles behind the circles
         for c in self.allcircles:
@@ -218,7 +224,7 @@ class Model(object):
 
         self.screen.blit(self.cat.playerrepresentation.poptart, self.cat.playerrepresentation.rect)
 
-    def switchMode(self,delta_t):
+    def switchMode(self,delta_t, counter):
         """what it does when you hold the mouse down"""
         cat_position = [self.cat.playerrepresentation.pos_x, self.cat.playerrepresentation.pos_y]
         center_cat = [cat_position[0]+self.cat.playerrepresentation.img_width/2, cat_position[1]+self.cat.playerrepresentation.img_height/2]
@@ -227,12 +233,42 @@ class Model(object):
             for circle in self.allcircles:
                 circle.vel_x = 0
             # calculates the distance between the circle and the cat and the difference between their x pos.
-            (x_diff, y_diff, circ_dist) = self.circles.find_closest(self.allcircles, center_cat, self.screen)
+            # if counter == 0:
+            dist_dict = {}
+            for circle in self.allcircles:
+                dist = sqrt((center_cat[0]-circle.pos_x)**2 + (center_cat[1]-circle.pos_y)**2)
+                dist_dict[circle] = dist
+            
+            # find the smallest distance from the cat
+            closest_circle = min(dist_dict, key=dist_dict.get)
 
-            # calculate the path and move the cat around the circle
-            (vel_x, vel_y) = self.cat.playerrepresentation.move_circle(x_diff,y_diff,circ_dist)
+            x_diff = (self.cat.playerrepresentation.center_cat[0] - closest_circle.pos_x)
+            y_diff = (self.cat.playerrepresentation.center_cat[1] - closest_circle.pos_y)
+            circ_dist = dist_dict[closest_circle]
 
-            self.cat.playerrepresentation.update(delta_t,vel_x,vel_y)
+            # draw a line from the cat to the closest circle
+            pygame.draw.line(self.screen, closest_circle.color, center_cat, (closest_circle.pos_x,closest_circle.pos_y),2)
+
+            print 'in if' + str(x_diff)
+            print counter
+
+            return closest_circle, circ_dist
+
+            # elif counter != 0:
+            #     print counter
+            #     print x_diff
+            #     # calculate the path and move the cat around the circle
+            #     (vel_x, vel_y) = self.cat.playerrepresentation.move_circle(x_diff,y_diff,circ_dist)
+
+            #     self.cat.playerrepresentation.update(delta_t,vel_x,vel_y)
+
+    def aroundCircle(self, nearest_circ, diag_dist, delta_t):
+        """ move around the closest circle """
+        x_diff = (self.cat.playerrepresentation.pos_x - self.cat.playerrepresentation.img_width/2 - nearest_circ.pos_x)
+        y_diff = (self.cat.playerrepresentation.pos_y - self.cat.playerrepresentation.img_height/2 - nearest_circ.pos_y)
+        circ_dist = diag_dist
+        (vel_x, vel_y) = self.cat.playerrepresentation.move_circle(x_diff,y_diff,circ_dist)
+        self.cat.playerrepresentation.update(delta_t,vel_x,vel_y)
 
     def returnMode(self):
         """returning back to state after mouse down"""
@@ -287,6 +323,7 @@ class NyanCat():
         self.model = Model(self.width, self.height)
         self.view = NyanView(self.model, self.width, self.height)
         self.controller = PygameKeyboardController(self.model)
+        self.pushnumber = 0
 
     def run(self):
         """ the main runloop... loop until death """
@@ -302,10 +339,9 @@ class NyanCat():
             if self.model.notPressed:
                 self.model.update(delta_t, 0, 0)
             else:
-                # Do something to count the first entry of this state
-                self.model.switchMode(delta_t)
+                nearest_circ, diag_dist = self.model.switchMode(delta_t,self.pushnumber)
+                self.model.aroundCircle(nearest_circ, diag_dist, delta_t)
                 pygame.display.update()
-                # Do not re-enter this loop unless it follows a notPressed mode
 
 ################################################################################
 
