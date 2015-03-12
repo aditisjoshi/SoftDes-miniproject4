@@ -181,16 +181,16 @@ class Model(object):
 
         circle_collision = self.cat.playerrepresentation.collides_with(self.allcircles)
         if len(circle_collision) != 0:
-            print 'loss'
+            print 'YOU LOSE!  SCORE: ' + str(len(self.allcircles))
             self.run = False
 
         # Check for collisions of cat into any circle or inner walls
         if self.notPressed:
             if (self.cat.playerrepresentation.pos_y <= self.walls.wall1_inner_y_pos):
-                print 'loss'
+                print 'YOU LOSE!  SCORE: ' + str(len(self.allcircles))
                 self.run = False
             if (self.cat.playerrepresentation.pos_y >= self.walls.wall2_inner_y_pos-self.cat.playerrepresentation.img_height):
-                print 'loss'
+                print 'YOU LOSE!  SCORE: ' + str(len(self.allcircles))
                 self.run = False
 
         ### Creates the rectangles behind the circles
@@ -219,14 +219,12 @@ class Model(object):
             circ_dist = dist_dict[closest_circle]
             # increase counter to jump to next function (aroundCircle)
             counter += 1
-            # score is the number of circles you pass by without dying
-            score = len(dist_dict)
-            
-            return closest_circle, circ_dist, counter, score
+
+            return closest_circle, circ_dist, counter
         
         #the mouse is clicked when there are no circles
         else:
-            return 0,0,0,0
+            return 0,0,0
 
     def aroundCircle(self, nearest_circ, diag_dist, delta_t, screen):
         """ move around the closest circle """
@@ -308,7 +306,7 @@ class NyanCat():
                 self.model.update(delta_t, 0, 0)
             else:
                 if self.model.pushnumber == 0:
-                    nearest_circ, diag_dist, self.model.pushnumber, score = self.model.clickMode(delta_t,self.model.pushnumber)
+                    nearest_circ, diag_dist, self.model.pushnumber = self.model.clickMode(delta_t,self.model.pushnumber)
                 # when the mouse is continued to press...
                 elif self.model.pushnumber > 0:
                     self.model.aroundCircle(nearest_circ, diag_dist, delta_t, self.model.screen)
