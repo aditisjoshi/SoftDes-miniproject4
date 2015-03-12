@@ -50,15 +50,14 @@ class Cat(pygame.sprite.Sprite):
         self.img_height = 44.5
         self.pos_x = pos_x
         self.pos_y = pos_y
-        self.cat_position = [pos_x,pos_y]
+        self.vel_x = 0
+        self.vel_y = 0
+        self.cat_position = [self.pos_x,self.pos_y]
         self.center_cat = [self.cat_position[0]+self.img_width/2, self.cat_position[1]+self.img_height/2]
-        # TODO: don't depend on relative path
         self.image = pygame.image.load('nyan_cat.png')
         self.image.set_colorkey((255,255,255)) 
         self.poptart = pygame.Surface((self.img_width, self.img_height))
         self.mask = pygame.mask.from_surface(self.poptart)
-        self.vel_x = 0
-        self.vel_y = 0
 
     @property
     def rect(self):
@@ -73,6 +72,8 @@ class Cat(pygame.sprite.Sprite):
         """Updates the players representation (the Nyan Cat)'s position """
         self.pos_x += vel_x*delta_t
         self.pos_y += vel_y*delta_t
+        self.cat_position = [self.pos_x,self.pos_y]
+        self.center_cat = [self.cat_position[0]+self.img_width/2, self.cat_position[1]+self.img_height/2]
 
     def move_circle(self,x_diff,y_diff,circ_dist):
         """ update the cat's velocity when the mouse is clicked so that a
@@ -159,6 +160,8 @@ class Model(object):
         self.width = width
         self.height = height
         self.cat = CatPlayer(self.width,self.height)
+        self.cat_position = self.cat.playerrepresentation.cat_position
+        self.center_cat = self.cat.playerrepresentation.center_cat
         self.allcircles = []
         self.circles = Circle(self.width,self.height)
         self.walls = Walls(self.width, self.height)
@@ -196,47 +199,46 @@ class Model(object):
 
         self.screen.blit(self.cat.playerrepresentation.poptart, self.cat.playerrepresentation.rect)
 
-    def switchMode(self,delta_t, counter):
-        """what it does when you hold the mouse down"""
-        cat_position = [self.cat.playerrepresentation.pos_x, self.cat.playerrepresentation.pos_y]
-        center_cat = [cat_position[0]+self.cat.playerrepresentation.img_width/2, cat_position[1]+self.cat.playerrepresentation.img_height/2]
-        
-        # stops the circles from moving
-        if len(self.allcircles) > 0:
+    def clickMode(self,delta_t, counter):
+        """what it does when you hold the mouse down""" 
+        # checks to see if there are circles on the screen
+        if len(self.allcircles) > 0: 
+            # stops the circles from moving when clicked
             for circle in self.allcircles:
                 circle.vel_x = 0
             # calculates the distance between the circle and the cat and the difference between their x pos.
             dist_dict = {}
             for circle in self.allcircles:
-                dist = sqrt((center_cat[0]-circle.pos_x)**2 + (center_cat[1]-circle.pos_y)**2)
+                dist = sqrt((self.center_cat[0]-circle.pos_x)**2 + (self.center_cat[1]-circle.pos_y)**2)
                 dist_dict[circle] = dist
             
             # find the smallest distance from the cat
             closest_circle = min(dist_dict, key=dist_dict.get)
-
-            x_diff = (self.cat.playerrepresentation.center_cat[0] - closest_circle.pos_x)
-            y_diff = (self.cat.playerrepresentation.center_cat[1] - closest_circle.pos_y)
+            x_diff = (self.center_cat[0] - closest_circle.pos_x)
+            y_diff = (self.center_cat[1] - closest_circle.pos_y)
             circ_dist = dist_dict[closest_circle]
-
             # increase counter to jump to next function (aroundCircle)
             counter += 1
-            return closest_circle, circ_dist, counter
+            # score is the number of circles you pass by without dying
+            score = len(dist_dict)
+
+            return closest_circle, circ_dist, counter, score
         
         #the mouse is clicked when there are no circles
         else:
-            return 0,0,0
+            return 0,0,0,0
 
     def aroundCircle(self, nearest_circ, diag_dist, delta_t, screen):
         """ move around the closest circle """
         # draw a line from the cat to the closest circle
-        pygame.draw.line(screen, nearest_circ.color, (self.cat.playerrepresentation.pos_x + self.cat.playerrepresentation.img_width/2, self.cat.playerrepresentation.pos_y + self.cat.playerrepresentation.img_height/2), (nearest_circ.pos_x,nearest_circ.pos_y),2)
-        x_diff = (self.cat.playerrepresentation.pos_x + self.cat.playerrepresentation.img_width/2 - nearest_circ.pos_x)
-        y_diff = (self.cat.playerrepresentation.pos_y + self.cat.playerrepresentation.img_height/2 - nearest_circ.pos_y)
+        pygame.draw.line(screen, nearest_circ.color, self.center_cat, (nearest_circ.pos_x,nearest_circ.pos_y),2)
+        x_diff = (self.center_cat[0] - nearest_circ.pos_x)
+        y_diff = (self.center_cat[1] - nearest_circ.pos_y)
         circ_dist = diag_dist
         (vel_x, vel_y) = self.cat.playerrepresentation.move_circle(x_diff,y_diff,circ_dist)
         self.cat.playerrepresentation.update(delta_t,vel_x,vel_y)
 
-    def returnMode(self):
+    def unclickedMode(self):
         """returning back to state after mouse down"""
         # makes the circles move again
         for circle in self.allcircles:
@@ -306,7 +308,7 @@ class NyanCat():
                 self.model.update(delta_t, 0, 0)
             else:
                 if self.model.pushnumber == 0:
-                    nearest_circ, diag_dist, self.model.pushnumber = self.model.switchMode(delta_t,self.model.pushnumber)
+                    nearest_circ, diag_dist, self.model.pushnumber, score = self.model.clickMode(delta_t,self.model.pushnumber)
                 # when the mouse is continued to press...
                 elif self.model.pushnumber > 0:
                     self.model.aroundCircle(nearest_circ, diag_dist, delta_t, self.model.screen)
@@ -324,7 +326,7 @@ class PygameKeyboardController(object):
         if (pygame.mouse.get_pressed()[0]):
             self.model.notPressed = False
         else:
-            self.model.returnMode()
+            self.model.unclickedMode()
             self.model.notPressed = True
 
 
