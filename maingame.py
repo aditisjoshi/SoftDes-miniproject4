@@ -200,12 +200,12 @@ class Model(object):
         """what it does when you hold the mouse down"""
         cat_position = [self.cat.playerrepresentation.pos_x, self.cat.playerrepresentation.pos_y]
         center_cat = [cat_position[0]+self.cat.playerrepresentation.img_width/2, cat_position[1]+self.cat.playerrepresentation.img_height/2]
+        
         # stops the circles from moving
         if len(self.allcircles) > 0:
             for circle in self.allcircles:
                 circle.vel_x = 0
             # calculates the distance between the circle and the cat and the difference between their x pos.
-            # if counter == 0:
             dist_dict = {}
             for circle in self.allcircles:
                 dist = sqrt((center_cat[0]-circle.pos_x)**2 + (center_cat[1]-circle.pos_y)**2)
@@ -218,15 +218,17 @@ class Model(object):
             y_diff = (self.cat.playerrepresentation.center_cat[1] - closest_circle.pos_y)
             circ_dist = dist_dict[closest_circle]
 
-            # draw a line from the cat to the closest circle
-            # pygame.draw.line(self.screen, closest_circle.color, center_cat, (closest_circle.pos_x,closest_circle.pos_y),2)
-
+            # increase counter to jump to next function (aroundCircle)
             counter += 1
-            
             return closest_circle, circ_dist, counter
+        
+        #the mouse is clicked when there are no circles
+        else:
+            return 0,0,0
 
     def aroundCircle(self, nearest_circ, diag_dist, delta_t, screen):
         """ move around the closest circle """
+        # draw a line from the cat to the closest circle
         pygame.draw.line(screen, nearest_circ.color, (self.cat.playerrepresentation.pos_x + self.cat.playerrepresentation.img_width/2, self.cat.playerrepresentation.pos_y + self.cat.playerrepresentation.img_height/2), (nearest_circ.pos_x,nearest_circ.pos_y),2)
         x_diff = (self.cat.playerrepresentation.pos_x + self.cat.playerrepresentation.img_width/2 - nearest_circ.pos_x)
         y_diff = (self.cat.playerrepresentation.pos_y + self.cat.playerrepresentation.img_height/2 - nearest_circ.pos_y)
@@ -305,9 +307,6 @@ class NyanCat():
             else:
                 if self.model.pushnumber == 0:
                     nearest_circ, diag_dist, self.model.pushnumber = self.model.switchMode(delta_t,self.model.pushnumber)
-                    # pygame.display.update()
-                    # self.model.aroundCircle(nearest_circ, diag_dist, delta_t)
-
                 # when the mouse is continued to press...
                 elif self.model.pushnumber > 0:
                     self.model.aroundCircle(nearest_circ, diag_dist, delta_t, self.model.screen)
