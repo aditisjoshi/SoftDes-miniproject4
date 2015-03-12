@@ -247,12 +247,12 @@ class Model(object):
             circ_dist = dist_dict[closest_circle]
 
             # draw a line from the cat to the closest circle
-            pygame.draw.line(self.screen, closest_circle.color, center_cat, (closest_circle.pos_x,closest_circle.pos_y),2)
+            # pygame.draw.line(self.screen, closest_circle.color, center_cat, (closest_circle.pos_x,closest_circle.pos_y),2)
 
-            print 'in if' + str(x_diff)
             print counter
-
-            return closest_circle, circ_dist
+            counter += 1
+            
+            return closest_circle, circ_dist, counter
 
             # elif counter != 0:
             #     print counter
@@ -262,8 +262,9 @@ class Model(object):
 
             #     self.cat.playerrepresentation.update(delta_t,vel_x,vel_y)
 
-    def aroundCircle(self, nearest_circ, diag_dist, delta_t):
+    def aroundCircle(self, nearest_circ, diag_dist, delta_t, screen):
         """ move around the closest circle """
+        pygame.draw.line(screen, nearest_circ.color, (self.cat.playerrepresentation.pos_x - self.cat.playerrepresentation.img_width/2, self.cat.playerrepresentation.pos_y - self.cat.playerrepresentation.img_height/2), (nearest_circ.pos_x,nearest_circ.pos_y),2)
         x_diff = (self.cat.playerrepresentation.pos_x - self.cat.playerrepresentation.img_width/2 - nearest_circ.pos_x)
         y_diff = (self.cat.playerrepresentation.pos_y - self.cat.playerrepresentation.img_height/2 - nearest_circ.pos_y)
         circ_dist = diag_dist
@@ -339,8 +340,15 @@ class NyanCat():
             if self.model.notPressed:
                 self.model.update(delta_t, 0, 0)
             else:
-                nearest_circ, diag_dist = self.model.switchMode(delta_t,self.pushnumber)
-                self.model.aroundCircle(nearest_circ, diag_dist, delta_t)
+                if self.pushnumber == 0:
+                    nearest_circ, diag_dist, self.pushnumber = self.model.switchMode(delta_t,self.pushnumber)
+                    # pygame.display.update()
+                    # self.model.aroundCircle(nearest_circ, diag_dist, delta_t)
+
+                # when the mouse is continued to press...
+                elif self.pushnumber > 0:
+                    self.model.aroundCircle(nearest_circ, diag_dist, delta_t, self.model.screen)
+                
                 pygame.display.update()
 
 ################################################################################
