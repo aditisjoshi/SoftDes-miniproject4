@@ -75,16 +75,7 @@ class Cat(pygame.sprite.Sprite):
     def move_circle(self,x_diff,y_diff,circ_dist):
         """ update the cat's velocity when the mouse is clicked so that a
         circular path can be followed"""
-        
-        # finding theta
-        # theta = acos(x_diff/circ_dist
-        # angular_vel = 0.1
-        # linear_vel = angular_vel * circ_dist
-        # vel_x = linear_vel * cos(theta)
-        # vel_y = linear_vel * sin(theta)
-        # velocity = (vel_x, vel_y)
-        # return velocity
-        scalar = 400
+        scalar = 2000
         vel_x = y_diff/circ_dist * scalar
         vel_y = -x_diff/circ_dist * scalar
         return (vel_x, vel_y)
@@ -156,10 +147,13 @@ class Circle(pygame.sprite.Sprite):
         """ finding the circle closest to the cat """
         dist_dict = {}
         for circle in circles:
-            dist = sqrt((center_cat[0]-self.pos_x)**2 + (center_cat[1]-self.pos_y)**2)
+            dist = sqrt((center_cat[0]-circle.pos_x)**2 + (center_cat[1]-circle.pos_y)**2)
             dist_dict[circle] = dist
+        
         # find the smallest distance from the cat
         closest_circle = min(dist_dict, key=dist_dict.get)
+        print dist_dict.values()
+        print dist_dict[closest_circle]
         x_diff = (center_cat[0] - closest_circle.pos_x)
         y_diff = (center_cat[1] - closest_circle.pos_y)
 
@@ -187,26 +181,27 @@ class Model(object):
         self.walls = Walls(self.width, self.height)
         self.screen = pygame.display.set_mode((width, height))
         self.notPressed = True
+        self.run = True
 
     def update(self, delta_t, vel_x, vel_y):
         """ updates the state of the cat clone and of the circles """
         self.cat.update(delta_t, 0, 0)
         for circle in self.allcircles:
             circle.update(delta_t)
-        make_circle = random.randint(0,1000)
-        if make_circle == 1000 and self.notPressed:
+        make_circle = random.randint(0,500)
+        if make_circle == 500 and self.notPressed:
             self.allcircles.append(Circle(self.width, self.height))
 
         circle_collision = self.cat.playerrepresentation.collides_with(self.allcircles)
         if len(circle_collision) != 0:
-            print 'BANG circle!'
+            self.run = False
 
         # Check for collisions of cat into any circle or inner walls
         if self.notPressed:
             if (self.cat.playerrepresentation.pos_y <= self.walls.wall1_inner_y_pos):
-                print 'BANG WALL1'
+                self.run = False
             if (self.cat.playerrepresentation.pos_y >= self.walls.wall2_inner_y_pos-self.cat.playerrepresentation.img_height):
-                print 'BANG Wall2'
+                self.run = False
 
         ### Creates the rectangles behind the circles
         for c in self.allcircles:
@@ -219,7 +214,6 @@ class Model(object):
         cat_position = [self.cat.playerrepresentation.pos_x, self.cat.playerrepresentation.pos_y]
         center_cat = [cat_position[0]+self.cat.playerrepresentation.img_width/2, cat_position[1]+self.cat.playerrepresentation.img_height/2]
         # stops the circles from moving
-        print self.cat.playerrepresentation.vel_x
         if len(self.allcircles) > 0:
             for circle in self.allcircles:
                 circle.vel_x = 0
@@ -228,7 +222,6 @@ class Model(object):
 
             # calculate the path and move the cat around the circle
             (vel_x, vel_y) = self.cat.playerrepresentation.move_circle(x_diff,y_diff,circ_dist)
-            print (vel_x, vel_y, circ_dist)
 
             self.cat.playerrepresentation.update(delta_t,vel_x,vel_y)
 
@@ -237,7 +230,6 @@ class Model(object):
         # makes the circles move again
         for circle in self.allcircles:
             circle.vel_x = 50
-        #start drawing circles
 
 ################################################################################ HERE STARTS THE VIEW
 
@@ -289,7 +281,7 @@ class NyanCat():
         """ the main runloop... loop until death """
         last_update = time.time()
 
-        while True:
+        while self.model.run:
             self.view.draw()
             delta_t = time.time() - last_update
             self.controller.process_events()
