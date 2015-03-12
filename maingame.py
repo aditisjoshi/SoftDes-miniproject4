@@ -197,11 +197,11 @@ class Model(object):
         if make_circle == 1000 and self.notPressed:
             self.allcircles.append(Circle(self.width, self.height))
 
+        # Check for collisions of cat into circles
         circle_collision = self.cat.playerrepresentation.collides_with(self.allcircles)
         if len(circle_collision) != 0:
             print 'BANG circle!'
-
-        # Check for collisions of cat into any circle or inner walls
+        # Check for collisions of cat into inner walls
         if self.notPressed:
             if (self.cat.playerrepresentation.pos_y <= self.walls.wall1_inner_y_pos):
                 print 'BANG WALL1'
@@ -220,7 +220,7 @@ class Model(object):
         center_cat = [cat_position[0]+self.cat.playerrepresentation.img_width/2, cat_position[1]+self.cat.playerrepresentation.img_height/2]
         # stops the circles from moving
         print self.cat.playerrepresentation.vel_x
-        if len(self.allcircles) > 0:
+        if len(self.allcircles) > 0:    # if there are circles...
             for circle in self.allcircles:
                 circle.vel_x = 0
             # calculates the distance between the circle and the cat and the difference between their x pos.
