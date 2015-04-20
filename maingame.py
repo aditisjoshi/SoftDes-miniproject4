@@ -135,6 +135,7 @@ class Circle(pygame.sprite.Sprite):
         self.vel_x = 50
         rand_color = random.randint(0,3)
         color_converter = [(144,245,0),(7,185,152),(192,16,191),(255,230,59)]
+        #use random.choice! :'(
         self.color = color_converter[rand_color]
 
         # for collision detection
@@ -152,6 +153,9 @@ class Circle(pygame.sprite.Sprite):
 
     def update(self, delta_t):
         """updates the circles position according to time"""
+        #try to avoid putting number/scale factors in without using a variable to denote what they are for.That way 
+        #maintainers of your code will know what changing 10 to 9 or 11 will do, plus they won't have to write the
+        #number more than once
         self.pos_x -= 10*self.vel_x*delta_t
         self.pos_y += 10*self.vel_y*delta_t
 
@@ -189,6 +193,8 @@ class Model(object):
             self.run = False
 
         # Check for collisions of cat into any circle or inner walls
+        # Interesting that this code is in here but that it seems like wall collisions don't trigger deaths or anything.
+        # Did ya'll ever figure it out?
         if self.notPressed:
             if (self.cat.playerrepresentation.pos_y <= self.walls.wall1_inner_y_pos):
                 print 'YOU LOSE!  SCORE: ' + str(len(self.allcircles))
@@ -244,6 +250,8 @@ class Model(object):
         """returning back to state after mouse down"""
         # makes the circles move again
         for circle in self.allcircles:
+            #avoid these magic numbers! the default circle velocity should really be a property of the model, so that you can easily change it
+            #later without having to rewrite it multiple times.
             circle.vel_x = 50
 
         self.pushnumber = 0
@@ -302,6 +310,9 @@ class NyanCat():
         while self.model.run:
             self.view.draw()
             delta_t = time.time() - last_update
+            #it's cool that you incorporated delta_t here so that velocity does actually act as a velocity. Something
+            #to keep in mind is that this generally isn't probably nessecary and removing it could simplify things for you, since
+            #you can just say that velocity is in units of pixels moved per frame, instead of pixels moved per second.
             self.controller.process_events()
             pygame.display.update()
             last_update = time.time()
@@ -313,6 +324,8 @@ class NyanCat():
                     nearest_circ, diag_dist, self.model.pushnumber = self.model.clickMode(delta_t,self.model.pushnumber)
                 # when the mouse is continued to press...
                 elif self.model.pushnumber > 0:
+                    #Ah, I see what's going on with the pushnumber now. Weird thing about the game is the circle slowly getting
+                    #bigger, which doesn't seem to be intentionally programmed in. I guess it's kind of like a game feature though! :)
                     self.model.aroundCircle(nearest_circ, diag_dist, delta_t, self.model.screen)
                 
                 pygame.display.update()
